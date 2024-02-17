@@ -42,6 +42,28 @@ class Router
                 $type = $this->post;
                 break;
         };
+
+        foreach ($type as $pt => $func) {
+            $pattern = preg_replace('(\{[a-z0-9]{0,}\})', '([a-z0-9]{0,})', $pt);
+
+            if (preg_match('#^(' . $pattern . ')*$#i', $url, $matches)) {
+                array_shift($matches);
+                array_shift($matches);
+
+                $itens = array();
+                if (preg_match_all('(\{[a-z0-9]{0,}\})', $pt, $m)) {
+                    $itens =  preg_replace('(\{|\}\)', '', $m[0]);
+                }
+
+                $arg = array();
+                foreach($matches as $key => $match) {
+                    $arg[$itens[$key]] = $match;
+                }
+
+                $func($arg);
+                break;
+            }
+        }
     }
 
     public function get($pattern, $function)
